@@ -132,11 +132,15 @@ angular.module('ionic-pullup', [])
                     return footer.defaultBehavior;
                 };
 
-                this.onTap = function (e) {
-                    e.gesture.srcEvent.preventDefault();
-                    e.gesture.preventDefault();
+                function onTap (e, staysOpen) {
+                    if(e.gesture) {
+                        e.gesture.srcEvent.preventDefault();
+                        e.gesture.preventDefault();
+                    }
 
                     $timeout(function () {
+                        if(typeof(staysOpen) !== 'undefined' && $scope.state == FooterState.EXPANDED) { return false; };
+                        
                         if ($scope.state == FooterState.COLLAPSED) {
                             if (footer.defaultBehavior == FooterBehavior.HIDE) {
                                 $scope.state = FooterState.MINIMIZED;
@@ -156,6 +160,14 @@ angular.module('ionic-pullup', [])
                         }
                     });
                 };
+
+                this.onToggle = function(e){
+                    onTap(e, true);
+                };
+
+                this.onTap = function (e){
+                    onTap(e);
+                }
 
                 this.onDrag = function (e) {
                     e.gesture.srcEvent.preventDefault();
@@ -286,6 +298,7 @@ angular.module('ionic-pullup', [])
                 // add gesture
                 $ionicGesture.on('tap', controller.onTap, $element);
                 $ionicGesture.on('drag dragstart dragend', controller.onDrag, $element);
+                $scope.$on('ionPullUp:toggle', controller.onToggle, $element);
 
                 controller.setHandleHeight(height);
 
